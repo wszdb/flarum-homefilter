@@ -1,0 +1,16 @@
+{
+  "name": "@wszdb/flarum-homefilter",
+  "version": "1.0.0",
+  "description": "Flarum extension for intelligent home page post filtering",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --watch"
+  },
+  "devDependencies": {
+    "flarum-webpack-config": "^2.0.2",
+    "webpack": "^5.76.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

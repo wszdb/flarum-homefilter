@@ -1,0 +1,9 @@
+wszdb-flarum-homefilter:
+  admin:
+    keywords_label: Filter Keywords
+    keywords_help: Enter keywords to limit, separated by commas (e.g., ads,spam,promotion)
+    keywords_placeholder: e.g., ads,spam,promotion
+    limit_label: Keyword Post Limit
+    limit_help: Maximum number of posts with keywords to show on homepage (default 5)
+  forum:
+    filter_active: Home filter is active

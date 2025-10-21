@@ -1,0 +1,31 @@
+{
+  "name": "wszdb/flarum-homefilter",
+  "description": "Intelligent home page post filtering with keyword-based quantity control",
+  "type": "flarum-extension",
+  "keywords": [
+    "flarum",
+    "extension",
+    "filter",
+    "home"
+  ],
+  "license": "MIT",
+  "require": {
+    "flarum/core": "^1.8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wszdb\\HomeFilter\\": "src/"
+    }
+  },
+  "extra": {
+    "flarum-extension": {
+      "title": "Home Filter",
+      "category": "feature",
+      "icon": {
+        "name": "fas fa-filter",
+        "backgroundColor": "#e74c3c",
+        "color": "#fff"
+      }
+    }
+  }
+}
