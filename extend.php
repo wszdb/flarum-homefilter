@@ -6,6 +6,7 @@ use Flarum\Extend;
 use Flarum\Api\Controller\ListDiscussionsController;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Discussion\Discussion;
+use Wszdb\HomeFilter\Listener\AdjustQueryLimit;
 
 return [
     // 注册前端资源
@@ -27,9 +28,9 @@ return [
             return (int)($value ?: 5);
         }),
 
-    // 使用 ApiController 扩展处理返回的数据
+    // ✅ 修复：移除全局 setLimit(100)，改为事件监听
+    // 只在首页场景下动态调整查询数量
     (new Extend\ApiController(ListDiscussionsController::class))
-        ->setLimit(100)  // 增加查询数量
         ->prepareDataForSerialization(function ($controller, &$data, $request, $document) {
             $settings = resolve(SettingsRepositoryInterface::class);
             
@@ -41,6 +42,15 @@ return [
             $filterParams = $request->getQueryParams()['filter'] ?? [];
             $filterQ = $filterParams['q'] ?? '';
             $filterTag = $filterParams['tag'] ?? '';
+            
+            // ✅ 新增：严格判断，只在首页且无其他过滤条件时处理
+            // 排除相关讨论查询（通过检测 nearataRelatedDiscussions 参数）
+            $isRelatedDiscussions = isset($filterParams['nearataRelatedDiscussions']);
+            
+            if ($isRelatedDiscussions) {
+                // 如果是相关讨论查询，直接返回，不做任何处理
+                return;
+            }
             
             // 仅在首页且有配置时过滤
             if (empty($filterQ) && empty($filterTag) && !empty($keywordsStr) && $limit > 0) {
@@ -132,4 +142,8 @@ return [
                 }
             }
         }),
+
+    // ✅ 新增：使用事件监听器在首页场景动态调整查询数量
+    (new Extend\Event())
+        ->listen(\Flarum\Api\Event\WillGetData::class, AdjustQueryLimit::class),
 ];
