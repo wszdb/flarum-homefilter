@@ -1,9 +1,10 @@
-wszdb-flarum-homefilter:
+wszdb-homefilter:
   admin:
     keywords_label: 过滤关键词
-    keywords_help: 输入需要限制的关键词，多个关键词用英文逗号分隔（如：广告,推广,营销）
-    keywords_placeholder: 例如：广告,推广,spam
-    limit_label: 关键词帖子数量限制
-    limit_help: 首页最多显示多少个包含关键词的帖子（默认5个）
-  forum:
-    filter_active: 首页过滤已启用
+    keywords_help: 多个关键词用英文逗号分隔，例如：广告,推广,spam
+    limit_label: 关键词帖子显示数量
+    limit_help: 设置包含关键词的帖子在首页最多显示几个（0表示完全隐藏）
+    filter_mode_label: 过滤模式
+    filter_mode_help: 选择根据标题还是标签进行关键词过滤
+    filter_mode_title: 标题过滤
+    filter_mode_tags: 标签过滤

@@ -6,17 +6,26 @@ app.initializers.add('wszdb/flarum-homefilter', () => {
     .registerSetting({
       setting: 'wszdb-homefilter.keywords',
       type: 'text',
-      label: app.translator.trans('wszdb-flarum-homefilter.admin.keywords_label'),
-      help: app.translator.trans('wszdb-flarum-homefilter.admin.keywords_help'),
-      placeholder: app.translator.trans('wszdb-flarum-homefilter.admin.keywords_placeholder')
+      label: app.translator.trans('wszdb-homefilter.admin.keywords_label'),
+      help: app.translator.trans('wszdb-homefilter.admin.keywords_help'),
+    })
+    .registerSetting({
+      setting: 'wszdb-homefilter.filter_mode',
+      type: 'select',
+      label: app.translator.trans('wszdb-homefilter.admin.filter_mode_label'),
+      help: app.translator.trans('wszdb-homefilter.admin.filter_mode_help'),
+      options: {
+        title: app.translator.trans('wszdb-homefilter.admin.filter_mode_title'),
+        tags: app.translator.trans('wszdb-homefilter.admin.filter_mode_tags'),
+      },
+      default: 'title',
     })
     .registerSetting({
       setting: 'wszdb-homefilter.limit',
       type: 'number',
-      label: app.translator.trans('wszdb-flarum-homefilter.admin.limit_label'),
-      help: app.translator.trans('wszdb-flarum-homefilter.admin.limit_help'),
-      placeholder: '5',
-      min: 1,
-      max: 50
+      label: app.translator.trans('wszdb-homefilter.admin.limit_label'),
+      help: app.translator.trans('wszdb-homefilter.admin.limit_help'),
+      min: 0,
+      default: 5,
     });
 });

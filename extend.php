@@ -6,6 +6,8 @@ use Flarum\Extend;
 use Flarum\Api\Controller\ListDiscussionsController;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Discussion\Discussion;
+use Flarum\Database\AbstractModel;
+use Illuminate\Database\ConnectionInterface;
 use Wszdb\HomeFilter\Listener\AdjustQueryLimit;
 
 return [
@@ -26,10 +28,12 @@ return [
         })
         ->serializeToForum('homefilter.limit', 'wszdb-homefilter.limit', function ($value) {
             return (int)($value ?: 5);
+        })
+        ->serializeToForum('homefilter.filterMode', 'wszdb-homefilter.filter_mode', function ($value) {
+            return $value ?: 'title';
         }),
 
-    // ✅ 修复：移除全局 setLimit(100)，改为事件监听
-    // 只在首页场景下动态调整查询数量
+    // ✅ 使用原版的 prepareDataForSerialization 方式
     (new Extend\ApiController(ListDiscussionsController::class))
         ->prepareDataForSerialization(function ($controller, &$data, $request, $document) {
             $settings = resolve(SettingsRepositoryInterface::class);
@@ -37,18 +41,17 @@ return [
             // 获取配置
             $keywordsStr = $settings->get('wszdb-homefilter.keywords', '');
             $limit = (int)$settings->get('wszdb-homefilter.limit', 5);
+            $filterMode = $settings->get('wszdb-homefilter.filter_mode', 'title');
             
             // 检查是否在首页
             $filterParams = $request->getQueryParams()['filter'] ?? [];
             $filterQ = $filterParams['q'] ?? '';
             $filterTag = $filterParams['tag'] ?? '';
             
-            // ✅ 新增：严格判断，只在首页且无其他过滤条件时处理
-            // 排除相关讨论查询（通过检测 nearataRelatedDiscussions 参数）
+            // 排除相关讨论查询
             $isRelatedDiscussions = isset($filterParams['nearataRelatedDiscussions']);
             
             if ($isRelatedDiscussions) {
-                // 如果是相关讨论查询，直接返回，不做任何处理
                 return;
             }
             
@@ -59,6 +62,28 @@ return [
                 if (!empty($keywords) && $data->count() > 0) {
                     $targetCount = (int)($request->getQueryParams()['page']['limit'] ?? 20);
                     
+                    // ✅ 如果是标签过滤模式，预先查询所有帖子的标签
+                    $discussionTags = [];
+                    if ($filterMode === 'tags') {
+                        $discussionIds = $data->pluck('id')->toArray();
+                        if (!empty($discussionIds)) {
+                            // ✅ 使用 resolve 获取数据库连接，而不是 DB Facade
+                            $db = resolve(ConnectionInterface::class);
+                            $tagResults = $db->table('discussion_tag')
+                                ->join('tags', 'discussion_tag.tag_id', '=', 'tags.id')
+                                ->whereIn('discussion_tag.discussion_id', $discussionIds)
+                                ->select('discussion_tag.discussion_id', 'tags.name')
+                                ->get();
+                            
+                            foreach ($tagResults as $row) {
+                                if (!isset($discussionTags[$row->discussion_id])) {
+                                    $discussionTags[$row->discussion_id] = [];
+                                }
+                                $discussionTags[$row->discussion_id][] = $row->name;
+                            }
+                        }
+                    }
+                    
                     // 第一步：标记要删除的项
                     $toRemove = [];
                     $keywordCount = 0;
@@ -66,14 +91,27 @@ return [
                     $filteredIds = [];
                     
                     foreach ($data as $index => $discussion) {
-                        // 检查标题是否包含关键词
                         $hasKeyword = false;
                         
-                        if (isset($discussion->title)) {
-                            foreach ($keywords as $keyword) {
-                                if (mb_strpos($discussion->title, $keyword) !== false) {
-                                    $hasKeyword = true;
-                                    break;
+                        if ($filterMode === 'tags') {
+                            // ✅ 标签过滤模式
+                            $tags = $discussionTags[$discussion->id] ?? [];
+                            foreach ($tags as $tagName) {
+                                foreach ($keywords as $keyword) {
+                                    if (mb_strpos($tagName, $keyword) !== false) {
+                                        $hasKeyword = true;
+                                        break 2;
+                                    }
+                                }
+                            }
+                        } else {
+                            // 标题过滤模式（原版逻辑）
+                            if (isset($discussion->title)) {
+                                foreach ($keywords as $keyword) {
+                                    if (mb_strpos($discussion->title, $keyword) !== false) {
+                                        $hasKeyword = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -115,19 +153,54 @@ return [
                             ->limit($needMore * 2)
                             ->get();
                         
+                        // ✅ 如果是标签模式，查询补充帖子的标签
+                        $additionalTags = [];
+                        if ($filterMode === 'tags' && $additional->count() > 0) {
+                            $additionalIds = $additional->pluck('id')->toArray();
+                            
+                            // ✅ 使用 resolve 获取数据库连接
+                            $db = resolve(ConnectionInterface::class);
+                            $tagResults = $db->table('discussion_tag')
+                                ->join('tags', 'discussion_tag.tag_id', '=', 'tags.id')
+                                ->whereIn('discussion_tag.discussion_id', $additionalIds)
+                                ->select('discussion_tag.discussion_id', 'tags.name')
+                                ->get();
+                            
+                            foreach ($tagResults as $row) {
+                                if (!isset($additionalTags[$row->discussion_id])) {
+                                    $additionalTags[$row->discussion_id] = [];
+                                }
+                                $additionalTags[$row->discussion_id][] = $row->name;
+                            }
+                        }
+                        
                         $supplemented = 0;
                         foreach ($additional as $discussion) {
                             if ($supplemented >= $needMore) {
                                 break;
                             }
                             
-                            // 检查是否包含关键词
                             $hasKeyword = false;
-                            if (isset($discussion->title)) {
-                                foreach ($keywords as $keyword) {
-                                    if (mb_strpos($discussion->title, $keyword) !== false) {
-                                        $hasKeyword = true;
-                                        break;
+                            
+                            if ($filterMode === 'tags') {
+                                // ✅ 标签过滤模式
+                                $tags = $additionalTags[$discussion->id] ?? [];
+                                foreach ($tags as $tagName) {
+                                    foreach ($keywords as $keyword) {
+                                        if (mb_strpos($tagName, $keyword) !== false) {
+                                            $hasKeyword = true;
+                                            break 2;
+                                        }
+                                    }
+                                }
+                            } else {
+                                // 标题过滤模式
+                                if (isset($discussion->title)) {
+                                    foreach ($keywords as $keyword) {
+                                        if (mb_strpos($discussion->title, $keyword) !== false) {
+                                            $hasKeyword = true;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -143,7 +216,7 @@ return [
             }
         }),
 
-    // ✅ 新增：使用事件监听器在首页场景动态调整查询数量
+    // ✅ 使用事件监听器在首页场景动态调整查询数量
     (new Extend\Event())
         ->listen(\Flarum\Api\Event\WillGetData::class, AdjustQueryLimit::class),
 ];
