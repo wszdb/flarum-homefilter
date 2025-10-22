@@ -3,10 +3,9 @@
 
 
 ![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
-
-
-
 ![Flarum](https://img.shields.io/badge/flarum-^1.8.0-orange.svg)
+
+<h4>📖 English | <a href="https://github.com/wszdb/flarum-homefilter/blob/main/README.zh-CN.md">简体中文</a></h4>
 
 🎯 **Intelligent Home Page Post Filter Extension** - Limits the number of specific post types displayed on the home page via keywords to maintain content diversity.
 
@@ -307,3 +306,4 @@ Thanks to the [Flarum](https://flarum.org) community for their support!
 **Made with ❤️ by&#x20;**[wszdb](https://github.com/wszdb)
 
 > （注：文档部分内容可能由 AI 生成）
+
