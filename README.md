@@ -1,194 +1,309 @@
 # Flarum Home Filter Extension
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Flarum](https://img.shields.io/badge/flarum-^1.8.0-orange.svg)](https://flarum.org)
 
-🎯 **智能首页帖子过滤插件** - 通过关键词限制特定类型帖子在首页的显示数量，保持内容多样性。
 
-## ✨ 功能特性
+![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-- 🔍 **智能关键词匹配** - 支持多关键词逗号分隔配置
-- 📊 **数量精确控制** - 灵活设置关键词帖子显示上限（1-50）
-- 🔄 **自动补偿机制** - 保持首页帖子总数不变
-- 🌐 **多语言支持** - 内置中文和英文语言包
-- ⚡ **高性能设计** - 双重过滤机制（SQL查询层 + 数据处理层）
-- 🎨 **友好管理界面** - 后台可视化配置，无需修改代码
 
-## 📋 使用场景
 
-适用于以下情况：
-- 限制广告、推广类帖子在首页的曝光度
-- 控制特定话题（如招聘、二手交易）的显示数量
-- 平衡不同类型内容的展示比例
-- 提升首页内容多样性和用户体验
+![Flarum](https://img.shields.io/badge/flarum-^1.8.0-orange.svg)
 
-## 🚀 安装方法
+🎯 **Intelligent Home Page Post Filter Extension** - Limits the number of specific post types displayed on the home page via keywords to maintain content diversity.
 
-### 方法一：Composer 安装（推荐）
+## ✨ Features
 
-```bash
+
+
+* 🔍 **Intelligent Keyword Matching** - Supports configuration of multiple keywords separated by commas
+
+* 📊 **Precise Quantity Control** - Flexibly set the maximum number of posts containing keywords (1-50)
+
+* 🔄 **Automatic Compensation Mechanism** - Maintains the total number of posts on the home page
+
+* 🌐 **Multi-Language Support** - Built-in Chinese and English language packs
+
+* ⚡ **High-Performance Design** - Dual filtering mechanism (SQL Query Layer + Data Processing Layer)
+
+* 🎨 **User-Friendly Admin Interface** - Visual configuration in the backend, no code modification required
+
+## 📋 Use Cases
+
+Ideal for the following scenarios:
+
+
+
+* Limiting the exposure of advertisement and promotion posts on the home page
+
+* Controlling the display quantity of specific topics (e.g., recruitment, second-hand transactions)
+
+* Balancing the display ratio of different content types
+
+* Enhancing home page content diversity and user experience
+
+## 🚀 Installation Methods
+
+### Method 1: Composer Installation (Recommended)
+
+
+
+```
 composer require wszdb/flarum-homefilter
+
 php flarum cache:clear
 ```
 
-### 方法二：手动安装
+### Method 2: Manual Installation
 
-1. 下载本仓库到 Flarum 的 `extensions` 目录：
-```bash
+
+
+1. Download this repository to the `extensions` directory of Flarum:
+
+
+
+```
 cd /path/to/flarum/extensions
+
 git clone https://github.com/wszdb/flarum-homefilter.git wszdb-homefilter
 ```
 
-2. 安装依赖并编译前端资源：
-```bash
+
+
+1. Install dependencies and compile frontend assets:
+
+
+
+```
 cd wszdb-homefilter
+
 composer install --no-dev
+
 npm install
+
 npm run build
 ```
 
-3. 在 Flarum 后台启用插件
 
-## ⚙️ 配置说明
 
-### 后台设置
+1. Enable the extension in the Flarum backend
 
-进入 **管理后台 → 扩展 → Home Filter** 进行配置：
+## ⚙️ Configuration Instructions
 
-1. **过滤关键词**
-   - 输入需要限制的关键词，多个关键词用英文逗号分隔
-   - 示例：`广告,推广,营销,spam`
-   - 匹配规则：帖子标题包含任一关键词即被识别
+### Backend Settings
 
-2. **关键词帖子数量限制**
-   - 设置首页最多显示多少个包含关键词的帖子
-   - 默认值：5
-   - 取值范围：1-50
+Navigate to **Admin Dashboard → Extensions → Home Filter** to configure:
 
-### 工作原理
+
+
+1. **Filter Keywords**
+
+* Enter keywords to be restricted, with multiple keywords separated by English commas
+
+* Example: `Advertisement,Promotion,Marketing,Spam`
+
+* Matching Rule: A post is identified if its title contains any of the keywords
+
+1. **Keyword Post Quantity Limit**
+
+* Set the maximum number of posts containing keywords to be displayed on the home page
+
+* Default Value: 5
+
+* Value Range: 1-50
+
+### Working Principle
+
+
 
 ```
-原始首页（20个帖子）
-├─ 包含关键词的帖子：10个
-└─ 不包含关键词的帖子：10个
+Original Home Page (20 posts)
 
-↓ 应用过滤（限制5个）
+├─ Posts containing keywords: 10
 
-过滤后首页（20个帖子）
-├─ 包含关键词的帖子：5个 ✓
-└─ 不包含关键词的帖子：15个 ✓（自动补充）
+└─ Posts without keywords: 10
+
+↓ After Applying Filter (Limit: 5)
+
+Filtered Home Page (20 posts)
+
+├─ Posts containing keywords: 5 ✓
+
+└─ Posts without keywords: 15 ✓ (Automatically supplemented)
 ```
 
-## 🔧 技术实现
+## 🔧 Technical Implementation
 
-### 核心机制
+### Core Mechanisms
 
-1. **SQL 查询层过滤**
-   - 在数据库查询阶段预先过滤
-   - 使用子查询统计关键词帖子数量
-   - 自动扩大查询范围以补偿被过滤的帖子
 
-2. **数据处理层精确控制**
-   - 对查询结果进行二次处理
-   - 确保关键词帖子数量精确符合限制
-   - 保证返回帖子总数与原始请求一致
 
-### 兼容性
+1. **SQL Query Layer Filtering**
 
-- ✅ Flarum 1.8.x
-- ✅ Flarum 2.0+ (理论兼容，需测试)
-- ✅ PHP 8.0+
-- ✅ MySQL 5.7+ / MariaDB 10.2+
+* Pre-filters during the database query phase
 
-### 性能优化
+* Uses subqueries to count the number of keyword-containing posts
 
-- 仅在首页（无搜索/标签过滤）时启用
-- 使用数据库索引加速关键词匹配
-- 避免全表扫描，查询效率高
+* Automatically expands the query scope to compensate for filtered posts
 
-## 📁 项目结构
+1. **Data Processing Layer Precision Control**
+
+* Performs secondary processing on query results
+
+* Ensures the number of keyword-containing posts strictly meets the limit
+
+* Guarantees the total number of returned posts matches the original request
+
+### Compatibility
+
+
+
+* ✅ Flarum 1.8.x
+
+* ✅ Flarum 2.0+ (Theoretically compatible, testing required)
+
+* ✅ PHP 8.0+
+
+* ✅ MySQL 5.7+ / MariaDB 10.2+
+
+### Performance Optimization
+
+
+
+* Only enabled on the home page (no search/tag filtering applied)
+
+* Uses database indexes to speed up keyword matching
+
+* Avoids full-table scans for high query efficiency
+
+## 📁 Project Structure
+
+
 
 ```
 flarum-homefilter/
+
 ├── src/
+
 │   └── Filter/
-│       ├── DiscussionFilter.php      # SQL查询层过滤器
-│       └── DiscussionProcessor.php   # 数据处理层过滤器
+
+│       ├── DiscussionFilter.php      # SQL Query Layer Filter
+
+│       └── DiscussionProcessor.php   # Data Processing Layer Filter
+
 ├── js/
+
 │   ├── src/
+
 │   │   ├── admin/
-│   │   │   └── index.js              # 管理后台界面
+
+│   │   │   └── index.js              # Admin Dashboard Interface
+
 │   │   └── forum/
-│   │       └── index.js              # 前台扩展
-│   └── dist/                         # 编译后的JS文件
+
+│   │       └── index.js              # Frontend Extension
+
+│   └── dist/                         # Compiled JS Files
+
 ├── locale/
-│   ├── en.json                       # 英文语言包
-│   └── zh-Hans.json                  # 简体中文语言包
-├── composer.json                     # Composer配置
-├── extend.php                        # 扩展注册文件
-├── package.json                      # NPM配置
-└── webpack.config.js                 # Webpack编译配置
+
+│   ├── en.json                       # English Language Pack
+
+│   └── zh-Hans.json                  # Simplified Chinese Language Pack
+
+├── composer.json                     # Composer Configuration
+
+├── extend.php                        # Extension Registration File
+
+├── package.json                      # NPM Configuration
+
+└── webpack.config.js                 # Webpack Compilation Configuration
 ```
 
-## 🛠️ 开发指南
+## 🛠️ Development Guide
 
-### 本地开发
+### Local Development
 
-1. 克隆仓库：
-```bash
+
+
+1. Clone the repository:
+
+
+
+```
 git clone https://github.com/wszdb/flarum-homefilter.git
+
 cd flarum-homefilter
 ```
 
-2. 安装依赖：
-```bash
+
+
+1. Install dependencies:
+
+
+
+```
 composer install
+
 npm install
 ```
 
-3. 监听文件变化并自动编译：
-```bash
+
+
+1. Watch for file changes and auto-compile:
+
+
+
+```
 npm run watch
 ```
 
-4. 生产环境编译：
-```bash
+
+
+1. Compile for production environment:
+
+
+
+```
 npm run build
 ```
 
-### 代码规范
+### Code Standards
 
-- PHP 代码遵循 PSR-12 标准
-- JavaScript 使用 ES6+ 语法
-- 提交前请运行 `composer validate` 检查配置
 
-## 🐛 问题反馈
 
-遇到问题？请提交 [Issue](https://github.com/wszdb/flarum-homefilter/issues)
+* PHP code follows the PSR-12 standard
 
-提交时请包含：
-- Flarum 版本
-- PHP 版本
-- 插件版本
-- 详细的错误信息或截图
+* JavaScript uses ES6+ syntax
 
-## 📝 更新日志
+* Run `composer validate` to check configurations before submission
 
-### v1.0.0 (2025-10-20)
+## 🐛 Issue Reporting
 
-- 🎉 初始版本发布
-- ✨ 实现关键词过滤功能
-- 🎨 添加管理后台配置界面
-- 🌐 支持中英文双语
+Encounter an issue? Please submit an [Issue](https://github.com/wszdb/flarum-homefilter/issues)
 
-## 📄 开源协议
+Include the following information when submitting:
 
-本项目采用 [MIT License](LICENSE) 开源协议。
 
-## 🙏 致谢
 
-感谢 [Flarum](https://flarum.org) 社区的支持！
+* Flarum version
 
----
+* PHP version
 
-**Made with ❤️ by [wszdb](https://github.com/wszdb)**
+* Extension version
+
+* Detailed error information or screenshots
+
+## 📄 Open Source License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgements
+
+Thanks to the [Flarum](https://flarum.org) community for their support!
+
+
+
+***
+
+**Made with ❤️ by&#x20;**[wszdb](https://github.com/wszdb)
+
+> （注：文档部分内容可能由 AI 生成）
