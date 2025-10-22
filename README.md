@@ -305,5 +305,3 @@ Thanks to the [Flarum](https://flarum.org) community for their support!
 
 **Made with ❤️ by&#x20;**[wszdb](https://github.com/wszdb)
 
-> （注：文档部分内容可能由 AI 生成）
-
