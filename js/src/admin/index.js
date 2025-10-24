@@ -27,5 +27,35 @@ app.initializers.add('wszdb/flarum-homefilter', () => {
       help: app.translator.trans('wszdb-homefilter.admin.limit_help'),
       min: 0,
       default: 5,
+    })
+    .registerSetting({
+      setting: 'wszdb-homefilter.supplement_mode',
+      type: 'select',
+      label: app.translator.trans('wszdb-homefilter.admin.supplement_mode_label'),
+      help: app.translator.trans('wszdb-homefilter.admin.supplement_mode_help'),
+      options: {
+        default: app.translator.trans('wszdb-homefilter.admin.supplement_mode_default'),
+        unread_random: app.translator.trans('wszdb-homefilter.admin.supplement_mode_unread_random'),
+      },
+      default: 'default',
+    })
+    .registerSetting({
+      setting: 'wszdb-homefilter.supplement_days',
+      type: 'number',
+      label: app.translator.trans('wszdb-homefilter.admin.supplement_days_label'),
+      help: app.translator.trans('wszdb-homefilter.admin.supplement_days_help'),
+      min: 1,
+      default: 7,
+    })
+    .registerSetting({
+      setting: 'wszdb-homefilter.sort_mode',
+      type: 'select',
+      label: app.translator.trans('wszdb-homefilter.admin.sort_mode_label'),
+      help: app.translator.trans('wszdb-homefilter.admin.sort_mode_help'),
+      options: {
+        time_desc: app.translator.trans('wszdb-homefilter.admin.sort_mode_time_desc'),
+        random: app.translator.trans('wszdb-homefilter.admin.sort_mode_random'),
+      },
+      default: 'time_desc',
     });
 });

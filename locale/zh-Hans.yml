@@ -1,10 +1,25 @@
 wszdb-homefilter:
   admin:
     keywords_label: 过滤关键词
-    keywords_help: 多个关键词用英文逗号分隔，例如：广告,推广,spam
-    limit_label: 关键词帖子显示数量
-    limit_help: 设置包含关键词的帖子在首页最多显示几个（0表示完全隐藏）
+    keywords_help: 输入需要过滤的关键词，多个关键词用英文逗号分隔（例如：广告,推广,招聘）
+    
     filter_mode_label: 过滤模式
-    filter_mode_help: 选择根据标题还是标签进行关键词过滤
+    filter_mode_help: 选择按标题还是标签进行过滤
     filter_mode_title: 标题过滤
     filter_mode_tags: 标签过滤
+    
+    limit_label: 关键词帖子显示数量
+    limit_help: 设置包含关键词的帖子在首页最多显示几个（设置为0则完全隐藏）
+    
+    supplement_mode_label: 补充策略
+    supplement_mode_help: 选择如何补充首页帖子
+    supplement_mode_default: 默认（时间倒序补充）
+    supplement_mode_unread_random: 未读随机（从过去X天未读帖子中随机选择）
+    
+    supplement_days_label: 补充天数范围
+    supplement_days_help: 当使用"未读随机"策略时，从过去多少天内的帖子中选择（默认7天）
+    
+    sort_mode_label: 首页排序方式
+    sort_mode_help: 选择首页帖子的排序方式（置顶帖始终在前）
+    sort_mode_time_desc: 时间倒序（最新回复在前）
+    sort_mode_random: 随机排序

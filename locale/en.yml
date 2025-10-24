@@ -1,10 +1,25 @@
 wszdb-homefilter:
   admin:
     keywords_label: Filter Keywords
-    keywords_help: Separate multiple keywords with commas, e.g., ad,spam,promotion
-    limit_label: Keyword Posts Display Limit
-    limit_help: Set the maximum number of posts containing keywords to display on the homepage (0 to hide completely)
+    keywords_help: Enter keywords to filter, separated by commas (e.g., ad,spam,promotion)
+    
     filter_mode_label: Filter Mode
-    filter_mode_help: Choose whether to filter by title or tags
+    filter_mode_help: Choose to filter by title or tags
     filter_mode_title: Title Filter
     filter_mode_tags: Tags Filter
+    
+    limit_label: Keyword Posts Display Limit
+    limit_help: Set the maximum number of keyword-matched posts to display on homepage (set to 0 to hide completely)
+    
+    supplement_mode_label: Supplement Strategy
+    supplement_mode_help: Choose how to supplement homepage discussions
+    supplement_mode_default: Default (time descending order)
+    supplement_mode_unread_random: Unread Random (randomly select from unread posts in past X days)
+    
+    supplement_days_label: Supplement Days Range
+    supplement_days_help: When using "Unread Random" strategy, select from posts within past days (default 7 days)
+    
+    sort_mode_label: Homepage Sort Mode
+    sort_mode_help: Choose how to sort homepage discussions (sticky posts always on top)
+    sort_mode_time_desc: Time Descending (latest reply first)
+    sort_mode_random: Random Sort
