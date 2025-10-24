@@ -14,10 +14,10 @@ wszdb-homefilter:
     supplement_mode_label: 补充策略
     supplement_mode_help: 选择如何补充首页帖子
     supplement_mode_default: 默认（时间倒序补充）
-    supplement_mode_unread_random: 未读随机（从过去X天未读帖子中随机选择）
+    supplement_mode_unread_random: 未读随机（从最近未读帖子中随机选择）
     
-    supplement_days_label: 补充天数范围
-    supplement_days_help: 当使用"未读随机"策略时，从过去多少天内的帖子中选择（默认7天）
+    unread_count_label: 未读帖子数量
+    unread_count_help: 当使用"未读随机"策略时，从用户最近多少条未读帖子中选择（默认50条，最小20条，未登录用户视所有帖子为未读）
     
     sort_mode_label: 首页排序方式
     sort_mode_help: 选择首页帖子的排序方式（置顶帖始终在前）

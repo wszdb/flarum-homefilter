@@ -40,12 +40,12 @@ app.initializers.add('wszdb/flarum-homefilter', () => {
       default: 'default',
     })
     .registerSetting({
-      setting: 'wszdb-homefilter.supplement_days',
+      setting: 'wszdb-homefilter.unread_count',
       type: 'number',
-      label: app.translator.trans('wszdb-homefilter.admin.supplement_days_label'),
-      help: app.translator.trans('wszdb-homefilter.admin.supplement_days_help'),
-      min: 1,
-      default: 7,
+      label: app.translator.trans('wszdb-homefilter.admin.unread_count_label'),
+      help: app.translator.trans('wszdb-homefilter.admin.unread_count_help'),
+      min: 20,
+      default: 50,
     })
     .registerSetting({
       setting: 'wszdb-homefilter.sort_mode',

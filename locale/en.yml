@@ -14,10 +14,10 @@ wszdb-homefilter:
     supplement_mode_label: Supplement Strategy
     supplement_mode_help: Choose how to supplement homepage discussions
     supplement_mode_default: Default (time descending order)
-    supplement_mode_unread_random: Unread Random (randomly select from unread posts in past X days)
+    supplement_mode_unread_random: Unread Random (randomly select from recent unread posts)
     
-    supplement_days_label: Supplement Days Range
-    supplement_days_help: When using "Unread Random" strategy, select from posts within past days (default 7 days)
+    unread_count_label: Unread Posts Count
+    unread_count_help: When using "Unread Random" strategy, select from user's recent X unread posts (default 50, minimum 20, guests see all posts as unread)
     
     sort_mode_label: Homepage Sort Mode
     sort_mode_help: Choose how to sort homepage discussions (sticky posts always on top)

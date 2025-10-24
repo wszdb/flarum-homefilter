@@ -36,8 +36,8 @@ return [
         ->serializeToForum('homefilter.supplementMode', 'wszdb-homefilter.supplement_mode', function ($value) {
             return $value ?: 'default';
         })
-        ->serializeToForum('homefilter.supplementDays', 'wszdb-homefilter.supplement_days', function ($value) {
-            return (int)($value ?: 7);
+        ->serializeToForum('homefilter.unreadCount', 'wszdb-homefilter.unread_count', function ($value) {
+            return (int)($value ?: 50);
         })
         ->serializeToForum('homefilter.sortMode', 'wszdb-homefilter.sort_mode', function ($value) {
             return $value ?: 'time_desc';
@@ -53,7 +53,7 @@ return [
             $limit = (int)$settings->get('wszdb-homefilter.limit', 5);
             $filterMode = $settings->get('wszdb-homefilter.filter_mode', 'title');
             $supplementMode = $settings->get('wszdb-homefilter.supplement_mode', 'default');
-            $supplementDays = (int)$settings->get('wszdb-homefilter.supplement_days', 7);
+            $unreadCount = (int)$settings->get('wszdb-homefilter.unread_count', 50);
             $sortMode = $settings->get('wszdb-homefilter.sort_mode', 'time_desc');
             
             // 检查是否在首页
@@ -177,9 +177,7 @@ return [
                             ->whereNotIn('id', $allExcludedIds);
                         
                         // ✅ 关键修复1：过滤掉设置为隐藏的 Tag 的帖子
-                        // 检查是否安装了 flarum/tags 扩展
                         if ($db->getSchemaBuilder()->hasTable('tags')) {
-                            // 排除所有带有 is_hidden=1 标签的讨论
                             $hiddenTagIds = $db->table('tags')
                                 ->where('is_hidden', 1)
                                 ->pluck('id')
@@ -197,32 +195,55 @@ return [
                         
                         // ✅ 新功能2：根据补充策略选择帖子
                         if ($supplementMode === 'unread_random') {
-                            // 未读随机模式：从过去X天的未读帖子中随机选择
-                            // ✅ 修复：使用 Carbon::now() 替代 now()
-                            $daysAgo = Carbon::now()->subDays($supplementDays);
-                            $supplementQuery->where('last_posted_at', '>=', $daysAgo);
+                            $unreadDiscussions = null;
                             
-                            // 如果用户已登录，只选择未读的帖子
+                            // 如果用户已登录，查询未读帖子
                             if (!$actor->isGuest()) {
-                                $supplementQuery->whereNotExists(function ($query) use ($actor, $db) {
+                                // 查询用户最近的未读帖子
+                                $unreadQuery = clone $supplementQuery;
+                                $unreadQuery->whereNotExists(function ($query) use ($actor, $db) {
                                     $query->select($db->raw(1))
                                         ->from('discussion_user')
                                         ->whereColumn('discussion_user.discussion_id', 'discussions.id')
                                         ->where('discussion_user.user_id', $actor->id)
                                         ->whereColumn('discussion_user.last_read_post_number', '>=', 'discussions.last_post_number');
-                                });
+                                })
+                                ->orderBy('last_posted_at', 'desc')
+                                ->limit($unreadCount);
+                                
+                                $unreadDiscussions = $unreadQuery->get();
                             }
-                            // 未登录用户：所有帖子都视为未读，不需要额外过滤
                             
-                            // 随机排序
-                            $supplementQuery->inRandomOrder();
+                            // ✅ 极端情况处理：如果没有未读帖子或未登录，降级到默认模式
+                            if ($unreadDiscussions === null || $unreadDiscussions->count() === 0) {
+                                // 降级到默认模式：按时间倒序
+                                $supplementQuery->orderBy('last_posted_at', 'desc');
+                                $additional = $supplementQuery->limit($needMore * 2)->get();
+                            } else {
+                                // 从未读帖子中随机选择
+                                $additional = $unreadDiscussions->shuffle();
+                                
+                                // ✅ 如果未读帖子不足，补充已读帖子
+                                if ($additional->count() < $needMore * 2) {
+                                    $readQuery = clone $supplementQuery;
+                                    $unreadIds = $additional->pluck('id')->toArray();
+                                    
+                                    if (!empty($unreadIds)) {
+                                        $readQuery->whereNotIn('id', $unreadIds);
+                                    }
+                                    
+                                    $readQuery->orderBy('last_posted_at', 'desc');
+                                    $readDiscussions = $readQuery->limit($needMore * 2)->get();
+                                    
+                                    // 合并未读和已读帖子
+                                    $additional = $additional->concat($readDiscussions);
+                                }
+                            }
                         } else {
                             // 默认模式：按时间倒序
                             $supplementQuery->orderBy('last_posted_at', 'desc');
+                            $additional = $supplementQuery->limit($needMore * 2)->get();
                         }
-                        
-                        // 查询额外的帖子（多查一些以备过滤）
-                        $additional = $supplementQuery->limit($needMore * 2)->get();
                         
                         // ✅ 如果是标签模式，查询补充帖子的标签
                         $additionalTags = [];
