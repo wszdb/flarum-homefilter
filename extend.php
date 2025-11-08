@@ -68,6 +68,25 @@ return [
                 return;
             }
             
+            // ✅ 修复：添加精确的首页路由判断
+            // ✅ 安全获取路由信息，避免null错误
+            $route = $request->getAttribute('route');
+            if (!$route) {
+                // 如果没有路由信息，不处理数据
+                return;
+            }
+            
+            $currentRoute = $route->getName();
+            
+            // 排除个人主页、标签页等其他场景
+            $isUserPage = strpos($currentRoute, 'user') !== false;
+            $isTagPage = strpos($currentRoute, 'tag') !== false;
+            
+            // 如果是个人主页或标签页，则不处理数据
+            if ($isUserPage || $isTagPage) {
+                return;
+            }
+            
             // 仅在首页且有配置时过滤
             if (empty($filterQ) && empty($filterTag) && !empty($keywordsStr) && $limit > 0) {
                 $keywords = array_filter(array_map('trim', explode(',', $keywordsStr)));
