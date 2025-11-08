@@ -70,20 +70,12 @@ return [
             
             // ✅ 修复：添加精确的首页路由判断
             // ✅ 安全获取路由信息，避免null错误
-            $route = $request->getAttribute('route');
-            if (!$route) {
-                // 如果没有路由信息，不处理数据
-                return;
-            }
+            // ✅ 最终修复：使用filter参数判断是否为个人主页
+            // 个人主页会有 filter['author'] 参数
+            $filterAuthor = $filterParams['author'] ?? '';
             
-            $currentRoute = $route->getName();
-            
-            // 排除个人主页、标签页等其他场景
-            $isUserPage = strpos($currentRoute, 'user') !== false;
-            $isTagPage = strpos($currentRoute, 'tag') !== false;
-            
-            // 如果是个人主页或标签页，则不处理数据
-            if ($isUserPage || $isTagPage) {
+            // 如果有author参数，说明是个人主页，不处理
+            if (!empty($filterAuthor)) {
                 return;
             }
             
